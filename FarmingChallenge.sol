@@ -10,7 +10,7 @@ import "@chainlink/contracts/src/v0.6/ChainlinkClient.sol";
 import "./RewardToken.sol";
 
 
-//to do , create a function that allow withdraw only for multiple of 1 days .
+
 
 
 contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
@@ -46,7 +46,7 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
     
     uint256 public startBlock; // block where the user actitvity start;
     
-    RewardToken rewardToken;
+    RewardToken rewardToken; // reward token 
     
     
     //events
@@ -59,13 +59,15 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
         rewardToken = _rewardToken;
     }
     
+
+    // get the total existing pools 
     function poolLength() external view returns (uint256) {
         return poolInfo.length;
     }
     
 
 
-    
+    // function to create a new pool
     function createPool(IERC20 _lpToken, uint256 _period) public onlyOwner {
         poolInfo.push(PoolInfo({
             lpToken: _lpToken,
@@ -78,7 +80,7 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
 
     
     
-    
+    //function to get the userPoint
     function getUserPoint(uint256 _pid, address _staker) public view returns (uint256){
         StakerInfo storage staker = stakerInfo[_pid][_staker];
         return staker.point;
@@ -111,6 +113,7 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
         
     }
     
+    // stake your lpToken
     function deposit(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         StakerInfo storage staker = stakerInfo[_pid][msg.sender];
@@ -127,6 +130,7 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
     }
     
     
+    // withdraw your lpToken
     function withdraw(uint256 _pid, uint256 _amount) public {
         PoolInfo storage pool = poolInfo[_pid];
         StakerInfo storage staker = stakerInfo[_pid][msg.sender];
@@ -141,14 +145,5 @@ contract FarmingTimeBaseReward is Ownable, ChainlinkClient {
         emit Withdraw(msg.sender, _pid, _amount);
     }
     
-    
-    function safeRewardTransfer(address _to, uint256 _amount) internal {
-        uint256 rewardBal = rewardToken.balanceOf(address(this));
-        if(_amount > rewardBal){
-            rewardToken.transfer(_to, _amount);
-        } else {
-            rewardToken.transfer(_to, rewardBal);
-        }
-    }
     
 }
